@@ -172,10 +172,15 @@ export default function DashboardPage() {
     handleOpenNewEvent({ day: colIdx, date: targetDate, start: hour, end: Math.min(hour + 1, 20) });
   };
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    if (e && typeof e.stopPropagation === 'function') {
+      e.stopPropagation();
+    }
+    setShowUserMenu(false);
+    setIsDrawerOpen(false);
     logout();
     addToast('Berhasil keluar. Sampai jumpa! 👋', 'success');
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   // ICS Export
@@ -628,6 +633,27 @@ export default function DashboardPage() {
             </button>
             <span className="db-export-subtext">Format standar RFC 5545</span>
           </div>
+
+          {/* User profile & Logout button in drawer (especially handy on mobile) */}
+          <div className="db-drawer-user-section">
+            <div className="db-drawer-user-card">
+              <div className="db-avatar-circle" style={{ width: 34, height: 34, fontSize: 13 }}>
+                {currentUser?.avatar}
+              </div>
+              <div className="db-drawer-user-meta">
+                <div className="db-drawer-user-name">{currentUser?.name || 'Pengguna'}</div>
+                <div className="db-drawer-user-email">{currentUser?.email || ''}</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="db-drawer-logout-btn"
+              onClick={handleLogout}
+              title="Keluar dari akun"
+            >
+              <LogoutIcon /> Keluar Akun
+            </button>
+          </div>
         </aside>
 
         {/* ── VIEWS ── */}
@@ -641,11 +667,11 @@ export default function DashboardPage() {
         )}
 
         {currentView === 'profile' && (
-          <ProfileView currentUser={currentUser} />
+          <ProfileView currentUser={currentUser} onLogout={handleLogout} />
         )}
 
         {currentView === 'settings' && (
-          <SettingsView currentUser={currentUser} />
+          <SettingsView currentUser={currentUser} onLogout={handleLogout} />
         )}
 
         {currentView === 'calendar' && (

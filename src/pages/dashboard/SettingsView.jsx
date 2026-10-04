@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
-import { CheckIcon2 } from '../../icons';
+import { CheckIcon2, LogoutIcon } from '../../icons';
 
-export default function SettingsView({ currentUser }) {
+export default function SettingsView({ currentUser, onLogout }) {
   const { addToast } = useToast();
   const [voiceOn, setVoiceOn] = useState(false);
 
@@ -16,18 +16,22 @@ export default function SettingsView({ currentUser }) {
       <div className="db-card" style={{paddingBottom: 24}}>
         <div className="set-row">
           <div>
-            <div className="db-card-title" style={{marginBottom: 4}}>Koneksi Google Calendar</div>
-            <div className="set-info">{currentUser?.email}</div>
+            <div className="db-card-title" style={{marginBottom: 4}}>Koneksi Akun & Kalender</div>
+            <div className="set-info">{currentUser?.email} {currentUser?.authProvider === 'google' ? '(Google Auth)' : '(Akun Lokal)'}</div>
           </div>
-          <button className="db-btn-outline" onClick={() => addToast('Mode demo: Tidak dapat memutuskan koneksi.', 'error')}>
-            Putuskan
+          <button 
+            type="button" 
+            className="db-btn-outline" 
+            onClick={onLogout}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#dc2626', borderColor: '#fca5a5' }}
+          >
+            <LogoutIcon /> Keluar Akun
           </button>
         </div>
 
         <div className="set-box">
-          <CheckIcon2 /> <span>Kalender tersinkron (simulasi)</span>
+          <CheckIcon2 /> <span>Kalender tersinkronisasi</span>
         </div>
-        <div className="db-hint-text">Mode proyek kuliah: koneksi Google disimulasikan, belum memakai OAuth atau API.</div>
       </div>
 
       <div className="db-card">

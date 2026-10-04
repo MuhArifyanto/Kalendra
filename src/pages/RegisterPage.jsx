@@ -34,10 +34,11 @@ function PasswordStrength({ password }) {
 export default function RegisterPage() {
   const { addToast }     = useToast();
   const navigate         = useNavigate();
-  const { register }     = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const [form, setForm]               = useState({ name: '', email: '', password: '' });
   const [errors, setErrors]           = useState({});
   const [loading, setLoading]         = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const validate = () => {
@@ -63,7 +64,7 @@ export default function RegisterPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 600));
     const result = register({ name: form.name.trim(), email: form.email, password: form.password });
     setLoading(false);
 
@@ -75,7 +76,18 @@ export default function RegisterPage() {
     }
   };
 
-  const handleGoogle = () => addToast('Mode demo: Pendaftaran Google dinonaktifkan.', 'error');
+  const handleGoogle = async () => {
+    setGoogleLoading(true);
+    const result = await loginWithGoogle();
+    setGoogleLoading(false);
+
+    if (result.ok) {
+      addToast(`Akun Google berhasil terhubung! Selamat datang, ${result.user?.name || 'Pengguna'}! 🎉`, 'success');
+      navigate('/dashboard');
+    } else {
+      addToast(result.message, 'error');
+    }
+  };
 
   return (
     <div className="auth-card">
@@ -87,9 +99,15 @@ export default function RegisterPage() {
         <span className="orange">hari lebih terencana.</span>
       </p>
 
-      <button id="btn-google-register" className="btn-google" type="button" onClick={handleGoogle}>
+      <button
+        id="btn-google-register"
+        className="btn-google"
+        type="button"
+        onClick={handleGoogle}
+        disabled={loading || googleLoading}
+      >
         <GoogleIcon />
-        Daftar dengan Google
+        {googleLoading ? 'Menghubungkan ke Google...' : 'Daftar dengan Google'}
       </button>
 
       <div className="divider">

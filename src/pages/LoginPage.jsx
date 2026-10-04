@@ -7,10 +7,11 @@ import { CalendarIcon, GoogleIcon, EyeIcon, ShieldIcon } from '../icons';
 export default function LoginPage() {
   const { addToast }   = useToast();
   const navigate       = useNavigate();
-  const { login }      = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [form, setForm]               = useState({ email: '', password: '' });
   const [errors, setErrors]           = useState({});
   const [loading, setLoading]         = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const validate = () => {
@@ -34,7 +35,7 @@ export default function LoginPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise(r => setTimeout(r, 600));
     const result = login({ email: form.email, password: form.password });
     setLoading(false);
 
@@ -46,7 +47,18 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogle = () => addToast('Mode demo: Login Google dinonaktifkan.', 'error');
+  const handleGoogle = async () => {
+    setGoogleLoading(true);
+    const result = await loginWithGoogle();
+    setGoogleLoading(false);
+
+    if (result.ok) {
+      addToast(`Selamat datang, ${result.user?.name || 'Pengguna'}! 🎉`, 'success');
+      navigate('/dashboard');
+    } else {
+      addToast(result.message, 'error');
+    }
+  };
 
   return (
     <div className="auth-card">
@@ -58,9 +70,15 @@ export default function LoginPage() {
         <span className="orange">hari lebih terencana.</span>
       </p>
 
-      <button id="btn-google-login" className="btn-google" type="button" onClick={handleGoogle}>
+      <button
+        id="btn-google-login"
+        className="btn-google"
+        type="button"
+        onClick={handleGoogle}
+        disabled={loading || googleLoading}
+      >
         <GoogleIcon />
-        Masuk dengan Google
+        {googleLoading ? 'Menghubungkan ke Google...' : 'Masuk dengan Google'}
       </button>
 
       <div className="divider">
