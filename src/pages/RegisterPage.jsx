@@ -35,7 +35,7 @@ export default function RegisterPage() {
   const { addToast }     = useToast();
   const navigate         = useNavigate();
   const { register, loginWithGoogle } = useAuth();
-  const [form, setForm]               = useState({ name: '', email: '', password: '' });
+  const [form, setForm]               = useState({ name: '', username: '', email: '', password: '' });
   const [errors, setErrors]           = useState({});
   const [loading, setLoading]         = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -45,8 +45,17 @@ export default function RegisterPage() {
     const errs = {};
     if (!form.name.trim()) errs.name = 'Nama lengkap wajib diisi';
     else if (form.name.trim().length < 2) errs.name = 'Nama minimal 2 karakter';
+
+    const cleanUsername = form.username.trim().replace(/^@/, '');
+    if (!cleanUsername) {
+      errs.username = 'Username wajib diisi';
+    } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(cleanUsername)) {
+      errs.username = 'Username harus 3-20 karakter (huruf, angka, atau underscore _)';
+    }
+
     if (!form.email) errs.email = 'Email wajib diisi';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Format email tidak valid';
+
     if (!form.password) errs.password = 'Kata sandi wajib diisi';
     else if (form.password.length < 6) errs.password = 'Minimal 6 karakter';
     return errs;
@@ -65,11 +74,16 @@ export default function RegisterPage() {
 
     setLoading(true);
     await new Promise(r => setTimeout(r, 600));
-    const result = register({ name: form.name.trim(), email: form.email, password: form.password });
+    const result = register({
+      name: form.name.trim(),
+      username: form.username.trim().replace(/^@/, ''),
+      email: form.email,
+      password: form.password
+    });
     setLoading(false);
 
     if (result.ok) {
-      addToast('Akun berhasil dibuat! Selamat datang di Daylight 🌤', 'success');
+      addToast(`Akun @${result.user?.username || form.username} berhasil dibuat! Selamat datang di Daylight 🌤`, 'success');
       navigate('/dashboard');
     } else {
       addToast(result.message, 'error');
@@ -112,7 +126,7 @@ export default function RegisterPage() {
 
       <div className="divider">
         <div className="divider-line" />
-        <span className="divider-text">atau gunakan email</span>
+        <span className="divider-text">atau daftar akun baru</span>
         <div className="divider-line" />
       </div>
 
@@ -127,6 +141,18 @@ export default function RegisterPage() {
             autoComplete="name" disabled={loading}
           />
           {errors.name && <p className="form-error-msg">⚠ {errors.name}</p>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="register-username" className="form-label">Username</label>
+          <input
+            id="register-username" name="username" type="text"
+            className={`form-input${errors.username ? ' error' : ''}`}
+            placeholder="username (misal: arifyanto)"
+            value={form.username} onChange={handleChange}
+            autoComplete="username" disabled={loading}
+          />
+          {errors.username && <p className="form-error-msg">⚠ {errors.username}</p>}
         </div>
 
         <div className="form-group">
@@ -172,7 +198,7 @@ export default function RegisterPage() {
       <div className="demo-note">
         <span className="demo-note-icon"><ShieldIcon /></span>
         <p className="demo-note-text">
-          Mode demo proyek kuliah. Data disimpan di <strong>localStorage browser</strong> Anda — tidak dikirim ke server manapun.
+          Data akun disimpan aman di <strong>browser lokal Anda</strong>. Anda dapat masuk menggunakan <strong>Username</strong> atau <strong>Email</strong>.
         </p>
       </div>
     </div>

@@ -506,7 +506,9 @@ export default function DashboardPage() {
                     <div className="db-user-dropdown">
                       <div className="db-dropdown-info">
                         <div className="db-dd-name">{currentUser?.name}</div>
-                        <div className="db-dd-email">{currentUser?.email}</div>
+                        <div className="db-dd-email">
+                          {currentUser?.username ? `@${currentUser.username} · ` : ''}{currentUser?.email}
+                        </div>
                       </div>
                       <hr className="db-dd-divider" />
                       <button className="db-dd-item" onClick={() => { setCurrentView('profile'); setShowUserMenu(false); }}>
@@ -642,7 +644,9 @@ export default function DashboardPage() {
               </div>
               <div className="db-drawer-user-meta">
                 <div className="db-drawer-user-name">{currentUser?.name || 'Pengguna'}</div>
-                <div className="db-drawer-user-email">{currentUser?.email || ''}</div>
+                <div className="db-drawer-user-email">
+                  {currentUser?.username ? `@${currentUser.username} · ` : ''}{currentUser?.email || ''}
+                </div>
               </div>
             </div>
             <button
